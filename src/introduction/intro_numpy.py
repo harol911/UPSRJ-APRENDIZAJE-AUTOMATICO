@@ -28,7 +28,7 @@ def ten_zeros_array(n: int) -> np.ndarray:
     - np.ndarray
         Arreglo de ceros de longitud n.
     """
-    arg = None
+    arg = np.zeros(n)
     return arg
 
 # Ejercicio 2
