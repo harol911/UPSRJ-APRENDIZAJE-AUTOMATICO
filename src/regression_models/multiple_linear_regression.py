@@ -38,33 +38,33 @@ class MultipleLinearRegressionCompare:
         # Creación de modelos de regresión lineal para las opciones
         self.m = self.create_model()
         # Entrenamiento de modelos
-        self.train_model(self.m, self.d[0])
+        self.train_model(self.m, self.d)
         # Coeficientes de regresor y la intercepción
         self.get_coef_and_int(self.m)
         # Gráficos de Regresión lineal múltiple
-        self.plot_model_and_predict(model=self.m, x=self.d[1], y=self.y, x_label=self.f1.capitalize(), y_label=self.f1.capitalize(), z_label=self.base.capitalize(), 
+        self.plot_model_and_predict(model=self.m, x=self.d[1], y=self.d[3], x_label=self.f1.capitalize(), y_label=self.f2.capitalize(), z_label=self.base.capitalize(), 
                                     out=os.path.join(out, f"multiple_linear_regression_{self.f1.lower()}_{self.f2.lower()}_{self.base.lower()}.png")) 
         # Cortes verticales individuales del gráfico
-        self.plot_variable(model=self.m, col=0, x=self.d[1], y=self.y, x_label=self.f1.capitalize(), y_label=self.base.capitalize(),
+        self.plot_variable(model=self.m, col=0, x=self.d[1], y=self.d[3], x_label=self.f1.capitalize(), y_label=self.base.capitalize(),
                         out=os.path.join(out, f"split_mlr_{self.f1.lower()}_{self.base.lower()}.png")) 
-        self.plot_variable(model=self.m, col=1, x=self.d[1], y=self.y, x_label=self.f1.capitalize(), y_label=self.base.capitalize(),
+        self.plot_variable(model=self.m, col=1, x=self.d[1], y=self.d[3], x_label=self.f2.capitalize(), y_label=self.base.capitalize(),
                         out=os.path.join(out, f"split_mlr_{self.f2.lower()}_{self.base.lower()}.png")) 
         
-    # TODO: Define un método que preprocese y estandarice las características correlacionadas. 
-    #       La forma común de hacer esto es restar el promedio y dividir por la desviación estándar. 
-    #       Scikit-learn tiene una implementación para esto.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html
-    #       https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html#sklearn.preprocessing.StandardScaler.fit_transform
     def standarize(self, x: np.ndarray) -> tuple[preprocessing.StandardScaler, np.ndarray]:
-        std_scaler = None
-        x_std = None
+        """
+        Preprocesa y estandariza las características correlacionadas.
+        Resta el promedio y divide por la desviación estándar.
+        
+        Args:
+            x (np.ndarray): Datos a estandarizar.
+            
+        Returns:
+            tuple: (StandardScaler ajustado, datos estandarizados)
+        """
+        std_scaler = preprocessing.StandardScaler()
+        x_std = std_scaler.fit_transform(x)
         return std_scaler, x_std
     
-    # TODO: Define un método que prepare la información para ser analizada por regresión lineal.
-    #       Recuerda que al hacer un modelo de aprendizaje automático debemos dividir la información disponible en
-    #       datos de entrenamiento y datos de pruebas, por lo tanto, a la salida debe 
-    #       haber un tuple(x_train, x_test, y_train, y_test) de arreglos de numpy.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
     def prepare_data(self, x:np.ndarray, y:np.ndarray, prc: float, random_state: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Divide los datos en conjuntos de entrenamiento y prueba.
@@ -78,11 +78,9 @@ class MultipleLinearRegressionCompare:
         Returns:
             tuple: (x_train, x_test, y_train, y_test)
         """
-        x_train, x_test, y_train, y_test = None, None, None, None
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=prc, random_state=random_state)
         return (x_train, x_test, y_train, y_test)
     
-    # TODO: Define un método que devuelva un objeto "linear_model.LinearRegression" de scikit-learn.
-    # NOTE: https://scikit-learn.org/stable/modules/linear_model.html
     def create_model(self) -> linear_model.LinearRegression:
         """
         Crea un modelo de regresión lineal.
@@ -90,13 +88,9 @@ class MultipleLinearRegressionCompare:
         Returns:
             LinearRegression: Modelo vacío listo para entrenar.
         """
-        return None
+        return linear_model.LinearRegression()
     
-    # TODO: Define un método que entrene un modelo de entrada "linear_model" de scikit-learn
-    #       con la información de entrada "data".
-    # NOTE: https://numpy.org/doc/stable/reference/generated/numpy.ndarray.reshape.html
-    #       https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit
-    def train_model(self, model: linear_model.LinearRegression, data: np.ndarray) -> None:
+    def train_model(self, model: linear_model.LinearRegression, data: tuple) -> None:
         """
         Entrena el modelo con los datos de entrenamiento.
 
@@ -104,11 +98,9 @@ class MultipleLinearRegressionCompare:
             model (LinearRegression): Modelo a entrenar.
             data (tuple): (x_train, x_test, y_train, y_test)
         """
-        pass
+        x_train, x_test, y_train, y_test = data
+        model.fit(x_train, y_train)
     
-    # TODO: Define un método que obtenga los coeficientes de regresor y la intercepción
-    #       de un modelo de entrada "linear_model" de scikit-learn.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression
     def get_coef_and_int(self, model: linear_model.LinearRegression) -> None:
         """
         Imprime los coeficientes y la intercepción del modelo.
@@ -116,7 +108,8 @@ class MultipleLinearRegressionCompare:
         Args:
             model (LinearRegression): Modelo entrenado.
         """
-        pass
+        print(f"Coeficientes: {model.coef_}")
+        print(f"Intercepción: {model.intercept_}")
         
     def plot_model_and_predict(self, model: linear_model.LinearRegression, x: np.ndarray, y: np.ndarray, x_label: str, y_label: str, z_label: str, out: str) -> None:
         try:
@@ -170,7 +163,7 @@ class MultipleLinearRegressionCompare:
     def plot_variable(self, model: linear_model.LinearRegression, col: int, x: np.ndarray, y: np.ndarray, x_label: str, y_label: str, out: str) -> None:
         try:
             plt.scatter(x[:,col], y,  color='blue')
-            plt.plot(x[:,col], model.coef_[0,col] * x[:,0] + model.intercept_[0], '-r')
+            plt.plot(x[:,col], model.coef_[0,col] * x[:,col] + model.intercept_[0], '-r')
             plt.xlabel(x_label)
             plt.ylabel(y_label)
             plt.savefig(out)

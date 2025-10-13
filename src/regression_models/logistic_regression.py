@@ -31,24 +31,25 @@ class LogisticRegressionCompare:
         self.d = self.prepare_data(x=self.x_std, y=self.y, prc=0.2, random_state=4)
         self.m = self.create_model()
         self.train_model(self.m, self.d)
-        self.plot_model_and_predict(self.m, index=self.source.data.columns[:-1], x=self.d[1], 
+        feature_names = ['tenure', 'age', 'address', 'income', 'ed', 'employ', 'equip']
+        self.plot_model_and_predict(self.m, index=feature_names, x=self.d[1], 
                                     y=self.d[3], out=os.path.join(out, "logistic_regression_churn_coefficients.png"))
         
-    # TODO: Define un método que preprocese y estandarice las características correlacionadas. 
-    #       La forma común de hacer esto es restar el promedio y dividir por la desviación estándar. 
-    #       Scikit-learn tiene una implementación para esto.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html
-    #       https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html#sklearn.preprocessing.StandardScaler.fit_transform
     def standarize(self, x: np.ndarray) -> tuple[StandardScaler, np.ndarray]:
-        std_scaler = None
-        x_std = None
+        """
+        Preprocesa y estandariza las características correlacionadas.
+        Resta el promedio y divide por la desviación estándar.
+        
+        Args:
+            x (np.ndarray): Datos a estandarizar.
+            
+        Returns:
+            tuple: (StandardScaler ajustado, datos estandarizados)
+        """
+        std_scaler = StandardScaler()
+        x_std = std_scaler.fit_transform(x)
         return std_scaler, x_std
     
-    # TODO: Define un método que prepare la información para ser analizada por regresión lineal.
-    #       Recuerda que al hacer un modelo de aprendizaje automático debemos dividir la información disponible en
-    #       datos de entrenamiento y datos de pruebas, por lo tanto, a la salida debe 
-    #       haber un tuple(x_train, x_test, y_train, y_test) de arreglos de numpy.
-    # NOTE: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
     def prepare_data(self, x:np.ndarray, y:np.ndarray, prc: float, random_state: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Divide los datos en conjuntos de entrenamiento y prueba.
@@ -62,24 +63,18 @@ class LogisticRegressionCompare:
         Returns:
             tuple: (x_train, x_test, y_train, y_test)
         """
-        x_train, x_test, y_train, y_test = None, None, None, None
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=prc, random_state=random_state)
         return (x_train, x_test, y_train, y_test)
 
-    # TODO: Define un método que devuelva un objeto "linear_model.LogisticRegression" de scikit-learn.
-    # NOTE: https://scikit-learn.org/stable/modules/linear_model.html
     def create_model(self) -> LogisticRegression:
         """
-        Crea un modelo de regresión lineal.
+        Crea un modelo de regresión logística.
 
         Returns:
             LogisticRegression: Modelo vacío listo para entrenar.
         """
-        return None
+        return LogisticRegression(solver='liblinear', random_state=0)
     
-    # TODO: Define un método que entrene un modelo de entrada "linear_model" de scikit-learn
-    #       con la información de entrada "data".
-    # NOTE: https://numpy.org/doc/stable/reference/generated/numpy.ndarray.reshape.html
-    #       https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit
     def train_model(self, model: LogisticRegression, data: np.ndarray) -> None:
         """
         Entrena el modelo con los datos de entrenamiento.
@@ -88,7 +83,8 @@ class LogisticRegressionCompare:
             model (LogisticRegression): Modelo a entrenar.
             data (tuple): (x_train, x_test, y_train, y_test)
         """
-        pass
+        x_train, x_test, y_train, y_test = data
+        model.fit(x_train, y_train)
     
     def plot_model_and_predict(self, model: LogisticRegression, index, x: np.ndarray, y:np.ndarray, out: str) -> None:
         try:
